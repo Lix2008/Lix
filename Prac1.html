@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Word Scramble Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 400% 400%;
+      animation: rainbow 10s ease infinite;
+      padding: 20px;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgb(124, 216, 208);
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(87, 221, 75, 0.1);
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+    }
+
+    input {
+      padding: 10px;
+      width: 80%;
+      margin-top: 10px;
+      border: 1px solid #000000;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background: #28a745;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    #timer {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: red;
+    }
+
+    .mode-buttons {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Word Scramble Game</h2>
+    <div class="mode-buttons">
+      <button onclick="setMode('history')">History Mode</button>
+    </div>
+    <p id="mode-title">History Edition</p>
+    <p id="scrambled-word"></p>
+    <p><strong>Hint:</strong> <span id="hint"></span></p>
+    <p id="timer">Time left: 30s</p>
+    <input type="text" id="guess" placeholder="Your answer..."/>
+    <button onclick="checkWord()">Submit</button>
+    <button onclick="newWord()">New Word</button>
+    <p class="message" id="message"></p>
+    <button onclick="playMusic()">Play Music</button>
+    <button onclick="stopMusic()">Stop Music</button>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bg-music" loop>
+    <source src="memory-reboot.mp3.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const historyWords = [
+      { word: "ANDRES BONIFACIO", hint: "Founder of KKK." },
+      { word: "BANK OF THE PHILIPPINE ISLANDS", hint: "First commercial bank in the Philippines." },
+      { word: "JOSE RIZAL", hint: "Pambansang Bayani ng Pilipinas." },
+      { word: "EMILIO AGUINALDO", hint: "1st Philippine President." },
+      { word: "JUNE 12 1898", hint: "Lupang Hinirang was first heard in public in." },
+      { word: "JAPAN", hint: "Country that occupied the Philippines during World War II." },
+      { word: "Ferdinand Magellan", hint: "Who discovered the Philippines?" },
+      { word: "UNITED STATES", hint: "Colonized the Philippines from 1898 to 1946, except for some years during WWII." },
+      { word: "EMILIO AGUINALDO", hint: "Who designed the Philippine flag?" },
+      { word: "THE CHOSEN LAND", hint: "Lupang Hinirang means." }
+    ];
+
+    let currentWord = "";
+    let scrambled = "";
+    let currentHint = "";
+    let currentAnswer = "";
+    let currentMode = "history";
+    let timer;
+    let timeLeft = 30;
+
+    function shuffle(word) {
+      return word.split('').sort(() => 0.5 - Math.random()).join('');
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 30;
+      document.getElementById("timer").textContent = `Time left: ${timeLeft}s`;
+
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `Time left: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          document.getElementById("message").textContent = "Time's up! ⏳";
+          document.getElementById("message").style.color = "red";
+          setTimeout(newWord, 2000);
+        }
+      }, 1000);
+    }
+
+    function newWord() {
+      if (currentMode === "history") {
+        const randomIndex = Math.floor(Math.random() * historyWords.length);
+        currentWord = historyWords[randomIndex].word;
+        currentHint = historyWords[randomIndex].hint;
+        scrambled = shuffle(currentWord.replace(/ /g, ''));
+        document.getElementById("scrambled-word").textContent = scrambled;
+        document.getElementById("hint").textContent = currentHint;
+        currentAnswer = currentWord;
+      }
+
+      document.getElementById("message").textContent = "";
+      document.getElementById("guess").value = "";
+      startTimer();
+    }
+
+    function checkWord() {
+      const userGuess = document.getElementById("guess").value.trim();
+
+      if (userGuess.toLowerCase() === currentAnswer.toLowerCase()) {
+        document.getElementById("message").textContent = "Correct! 🎉";
+        document.getElementById("message").style.color = "green";
+        clearInterval(timer);
+      } else {
+        document.getElementById("message").textContent = "Try again! ❌";
+        document.getElementById("message").style.color = "red";
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById("mode-title").textContent = "History Edition";
+      newWord();
+    }
+
+    function playMusic() {
+      const audio = document.getElementById("bg-music");
+      audio.play();
+    }
+
+    function stopMusic() {
+      const audio = document.getElementById("bg-music");
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    // Load a word on page load
+    window.onload = newWord;
+  </script>
+</body>
+</html>
